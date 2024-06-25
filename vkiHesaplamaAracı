@@ -1,0 +1,66 @@
+<b>Vücut Kitle Endeksi Hesaplama Aracı </b><br>
+<form action="" method="post">
+Adınız: <input type="text" name="ad"><br>
+Soyadınız: <input type="text" name="sad"><br>
+Cinsiyet: 
+<input type="radio" name="cins" value="kadin">Kadın
+<input type="radio" name="cins" value="erkek">Erkek <br>
+Doğum yılı:
+<select name="yil">
+<option value="2000">2000</option>
+<option value="2001">2001</option>
+<option value="2002">2002</option>
+<option value="2003">2003</option>
+<option value="2004">2004</option>
+<option value="2005">2005</option>
+</select><br>
+Boyunuz: <input type="text" name="boy"><br>
+Kilo: <input type="text" name="kilo"><br>
+<input type="submit" name="hesap" value="Hesapla ve Kaydet">
+<input type="submit" name="sil" value="Veritabanından Sil">
+</form>
+<?php
+$x= new PDO("mysql:host=localhost;dbname=vkihesap", 'root',''); /*bağlantı kodudur. */
+
+
+
+if(isset($_POST['hesap']))
+{
+	$isim=$_POST['ad'];
+	$soyad=$_POST['sad'];
+	$cins=$_POST['cins'];
+	$dy=$_POST['yil'];
+	$b=$_POST['boy']/100;
+	$kilo=$_POST['kilo'];
+	$vki=$kilo/($b*$b); //kilo/(boyunkaresi)
+	$yas=2024-$dy;
+	
+	if($vki<18.5)
+		$mesaj="Düşük kilolu";
+	elseif($vki>=18.50 && $vki<=24.99)   
+		$mesaj="Normal kilolu";
+	elseif($vki>=25.50 && $vki<=29.99)
+		$mesaj="Fazla kilolu";
+	elseif($vki>=30)
+		$mesaj="Obez";
+		
+	echo "Merhaba $isim $soyad <br>";
+	echo "<b>Yaşınız:</b> $yas <br>";
+	echo "<b>Vücut kitle indeksiniz:</b> $vki <br>";
+	echo "$mesaj gruptasınız <br>";
+	
+	$ekle = $x->exec("INSERT INTO `vucutkitle`(`ad`, `soyad`, `cinsiyet`, `dogumyili`, `boy`, `kilo`, `yas`, `vki`, `kategori`) VALUES ('$isim','$soyad','$cins','$dy','$b','$kilo','$yas','$vki','$mesaj')"); //ekleme kodu
+	if($ekle)
+		echo "Bilgileriniz VERİTABANINA KAYDEDİLDİ.";	
+}
+
+
+if(isset($_POST['sil']))
+{
+	$isim=$_POST['ad'];
+	$soyad=$_POST['sad'];
+	$sil=$x->exec("DELETE FROM vucutkitle WHERE ad='$isim' AND soyad='$soyad' ");
+	if($sil)
+		echo "Silindi.";
+}
+?>
